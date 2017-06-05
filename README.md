@@ -31,10 +31,11 @@ Automating description for Web Archives in ArchivesSpace using the Archive-It CD
 
 ##### Examples:
 
-* https://partner.archive-it.org/api/collections?account=625
-* https://partner.archive-it.org/api/collections?account=625&id=3308
+* https://partner.archive-it.org/api/collections?account=
+* 
+* https://partner.archive-it.org/api/collections?account=652&id=3308
 * https://partner.archive-it.org/api/collections?id=3308
-* https://partner.archive-it.org/api/collections?account=625&created_by=gwiedeman
+* https://partner.archive-it.org/api/collections?account=652&created_by=gwiedeman
 
 ### Seeds
 
