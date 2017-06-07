@@ -224,76 +224,78 @@ try:
 			if len(iaCDX.text.split("\n")) > 1:
 				for iaCapture in iaCDX.text.split("\n"):
 					if len(iaCapture) > 0:
-						#print iaCapture
-						hash = iaCapture.split(" ")[5]
-						if not hash in localHashList:
-							if not hash in hashList:
-								hashList.append(hash)
-								captureCount += 1
-								timestamp = int(iaCapture.split(" ")[1][:8])
-								if int(str(timestamp)[4:][:2]) > 12 or int(str(timestamp)[6:][:2]) > 31:
-									print ("		invalid date in CDX: " + str(timestamp))
-								else:
-									print ("		found new capture: " + str(timestamp))
-									fullTimestamp = int(iaCapture.split(" ")[1])
-									if timestamp < firstDate:
-										firstDate = timestamp
-									if timestamp > lastDate:
-										lastDate = timestamp
-									#create a new Archival Object record
-									newRecord = AS.makeArchObj()
-									newRecord.publish = True
-									newRecord.level = "item"
-									if result.jsonmodel_type == "resource":
-										newRecord.resource = {"ref": result.uri}
+						if len(iaCapture.split(" ")) < 6:
+							print ("Invalid CDX? could not find hash for " + str(iaCapture))
+						else:
+							hash = iaCapture.split(" ")[5]
+							if not hash in localHashList:
+								if not hash in hashList:
+									hashList.append(hash)
+									captureCount += 1
+									timestamp = int(iaCapture.split(" ")[1][:8])
+									if int(str(timestamp)[4:][:2]) > 12 or int(str(timestamp)[6:][:2]) > 31:
+										print ("		invalid date in CDX: " + str(timestamp))
 									else:
-										newRecord.parent = {"ref": result.uri}
-										newRecord.resource = {"ref": result.resource.ref}
-									newRecord = AS.makeDate(newRecord, dacs.stamp2DACS(str(timestamp))[1])
-									daoURL = "https://web.archive.org/web/" + str(fullTimestamp) + "/" + recordURL
-									#get page <title>
-									soup = BeautifulSoup(requests.get(daoURL).text, "html.parser")
-									#try to get page <title>
-									try:
-										pageTitle = soup.title.string
-									except:
-										pageTitle = "&lt;title&gt; not present"	
-									newRecord.title = pageTitle
-									#try to get data from meta tags
-									try:
-										scopeNote = ""
-										for tag in soup.find_all("meta"):
-											if tag.has_attr("name"):
-												if "author" in tag.get("name", None).lower():
-													authorNote = tag.get("content", None)
-													if len(authorNote) > 0:
-														scopeNote = scopeNote + "<p><b>Meta tag for author:</b> " + authorNote + "</p>"
-												elif "description" in tag.get("name", None).lower():
-													descNote = tag.get("content", None)
-													if len(descNote) > 0:
-														scopeNote = scopeNote + "<p><b>Meta tag for description:</b> " + descNote + "</p>"		
-												elif "keywords" in tag.get("name", None).lower():
-													keywordsNote = tag.get("content", None)
-													if len(keywordsNote) > 0:
-														scopeNote = scopeNote + "<p><b>Meta tag for keywords:</b> " + keywordsNote + "</p>"									
-												elif "language" in tag.get("name", None).lower():
-													langNote = tag.get("content", None)
-													if len(langNote) > 0:
-														newRecord = AS.makeSingleNote(newRecord, "langmaterial", langNote)
-										if len(scopeNote) > 0:
-											newRecord = AS.makeMultiNote(newRecord, "scopecontent", scopeNote)
-									except:
-										pass
-									newRecord = AS.makeMultiNote(newRecord, "acqinfo", generalANote)
-									newDAO = AS.makeDAO(pageTitle, daoURL, hash, "sha-1")
-									newDAO.publish = True
-									#post digital object record
-									postDAO = AS.postDAO(session, repo, newDAO, aspaceLogin)
-									if postDAO.status_code == 200:
-										daoURI = postDAO.json()["uri"]
-									newRecord = AS.addDAO(newRecord, daoURI)
-									#add this record to the new object list:
-									newObjectList.append([int(timestamp), newRecord])
+										print ("		found new capture: " + str(timestamp))
+										fullTimestamp = int(iaCapture.split(" ")[1])
+										if timestamp < firstDate:
+											firstDate = timestamp
+										if timestamp > lastDate:
+											lastDate = timestamp
+										#create a new Archival Object record
+										newRecord = AS.makeArchObj()
+										newRecord.publish = True
+										newRecord.level = "item"
+										if result.jsonmodel_type == "resource":
+											newRecord.resource = {"ref": result.uri}
+										else:
+											newRecord.parent = {"ref": result.uri}
+											newRecord.resource = {"ref": result.resource.ref}
+										newRecord = AS.makeDate(newRecord, dacs.stamp2DACS(str(timestamp))[1])
+										daoURL = "https://web.archive.org/web/" + str(fullTimestamp) + "/" + recordURL
+										#get page <title>
+										soup = BeautifulSoup(requests.get(daoURL).text, "html.parser")
+										#try to get page <title>
+										try:
+											pageTitle = soup.title.string
+										except:
+											pageTitle = "&lt;title&gt; not present"	
+										newRecord.title = pageTitle
+										#try to get data from meta tags
+										try:
+											scopeNote = ""
+											for tag in soup.find_all("meta"):
+												if tag.has_attr("name"):
+													if "author" in tag.get("name", None).lower():
+														authorNote = tag.get("content", None)
+														if len(authorNote) > 0:
+															scopeNote = scopeNote + "<p><b>Meta tag for author:</b> " + authorNote + "</p>"
+													elif "description" in tag.get("name", None).lower():
+														descNote = tag.get("content", None)
+														if len(descNote) > 0:
+															scopeNote = scopeNote + "<p><b>Meta tag for description:</b> " + descNote + "</p>"		
+													elif "keywords" in tag.get("name", None).lower():
+														keywordsNote = tag.get("content", None)
+														if len(keywordsNote) > 0:
+															scopeNote = scopeNote + "<p><b>Meta tag for keywords:</b> " + keywordsNote + "</p>"									
+													elif "language" in tag.get("name", None).lower():
+														langNote = tag.get("content", None)
+														if len(langNote) > 0:
+															newRecord = AS.makeSingleNote(newRecord, "langmaterial", langNote)
+											if len(scopeNote) > 0:
+												newRecord = AS.makeMultiNote(newRecord, "scopecontent", scopeNote)
+										except:
+											pass
+										newRecord = AS.makeMultiNote(newRecord, "acqinfo", generalANote)
+										newDAO = AS.makeDAO(pageTitle, daoURL, hash, "sha-1")
+										newDAO.publish = True
+										#post digital object record
+										postDAO = AS.postDAO(session, repo, newDAO, aspaceLogin)
+										if postDAO.status_code == 200:
+											daoURI = postDAO.json()["uri"]
+										newRecord = AS.addDAO(newRecord, daoURI)
+										#add this record to the new object list:
+										newObjectList.append([int(timestamp), newRecord])
 								
 							
 							
@@ -616,7 +618,7 @@ try:
 			if str(post).strip() == "200":
 				print (str(post).strip() + " --> posted updated web archives object:  " + result.title)
 			else:
-				raise ValueError(str(post) + " --> failed to post updated web archives object:\n\n" + result)
+				raise ValueError(str(post.status_code) + " --> failed to post updated web archives object:\n\n" + result)
 			
 			#update parents
 			if result.jsonmodel_type == "archival_object":
