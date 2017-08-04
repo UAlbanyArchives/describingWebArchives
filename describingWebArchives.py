@@ -11,6 +11,7 @@ import sys
 import traceback
 import datetime
 import gc
+import time
 
 # version dependant imports
 if sys.version_info[0] < 3:
@@ -287,15 +288,20 @@ try:
 										except:
 											pass
 										newRecord = AS.makeMultiNote(newRecord, "acqinfo", generalANote)
+										if len(pageTitle) < 1:
+											pageTitle = "&lt;title&gt; not present"	
 										newDAO = AS.makeDAO(pageTitle, daoURL, hash, "sha-1")
 										newDAO.publish = True
 										#post digital object record
 										postDAO = AS.postDAO(session, repo, newDAO, aspaceLogin)
 										if postDAO.status_code == 200:
 											daoURI = postDAO.json()["uri"]
-										newRecord = AS.addDAO(newRecord, daoURI)
-										#add this record to the new object list:
-										newObjectList.append([int(timestamp), newRecord])
+											newRecord = AS.addDAO(newRecord, daoURI)
+											#add this record to the new object list:
+											newObjectList.append([int(timestamp), newRecord])
+										else:
+											print ("Error posting DAO")
+											AS.pp(newDAO)
 								
 							
 							
@@ -426,7 +432,10 @@ try:
 								try:
 									crawlResponse = aitSession.get("https://partner.archive-it.org/api/crawl_job/" + crawlID + "?format=json")
 								except:
+									print ("Connection failed, waiting to try again...")
+									time.sleep(32)
 									#try again!
+									print ("Trying crawl request again.")
 									crawlResponse = aitSession.get("http://partner.archive-it.org/api/crawl_job/" + crawlID + "?format=json")
 									
 								if crawlResponse.status_code != 200:
@@ -618,7 +627,7 @@ try:
 			if str(post).strip() == "200":
 				print (str(post).strip() + " --> posted updated web archives object:  " + result.title)
 			else:
-				raise ValueError(str(post.status_code) + " --> failed to post updated web archives object:\n\n" + result)
+				raise ValueError(str(post) + " --> failed to post updated web archives object:\n\n" + result)
 			
 			#update parents
 			if result.jsonmodel_type == "archival_object":
