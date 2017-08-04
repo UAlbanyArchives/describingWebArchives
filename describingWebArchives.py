@@ -401,7 +401,9 @@ try:
 								ruleCheck = False
 								for rule in hostRules:
 									if rule["collection"] == aitCollection:
-										if int(timestamp) > int(rule["created_date"].split("T")[0].replace("-", "")):
+										if rule["created_date"] is None:
+											ruleCheck = True
+										elif int(timestamp) > int(rule["created_date"].split("T")[0].replace("-", "")):
 											ruleCheck = True
 								if ruleCheck == True:
 									crawlAcqinfo = "<b>Crawl Rules</b>"
@@ -410,7 +412,14 @@ try:
 								for rule in hostRules:
 									if rule["collection"] == aitCollection:
 										#check if rule existed during crawl
-										if int(timestamp) > int(rule["created_date"].split("T")[0].replace("-", "")):
+										if rule["created_date"] is None:
+											if rule["value"] is None:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + rule["type"] + " for host " + rule["host"] + " (last updated " + " (last updated " + rule["last_updated_date"].split("T")[0] + ")"
+											elif rule["url_match"] is None:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + rule["type"] + " " + rule["value"] +" for host " + rule["host"] + " (last updated " + rule["last_updated_date"].split("T")[0] + ")"
+											else:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + str(rule["type"]) + " " + str(rule["value"]) + "(" + str(rule["url_match"]) + ")" +" for host " + str(rule["host"]) + " (last updated " + str(rule["last_updated_date"]).split("T")[0] + ")"
+										elif int(timestamp) > int(rule["created_date"].split("T")[0].replace("-", "")):
 											if rule["value"] is None:
 												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + rule["type"] + " for host " + rule["host"] + " (last updated " + " (created " + rule["created_date"].split("T")[0] + ", last updated " + rule["last_updated_date"].split("T")[0] + ")"
 											elif rule["url_match"] is None:
