@@ -70,9 +70,9 @@ try:
 	print ("Requesting Seed List")
 	seedList = aitSession.get("https://partner.archive-it.org/api/seed?format=json").json()
 	print ("Requesting Host Rules")
-	hostRules = aitSession.get("https://partner.archive-it.org/api/host_rule?format=json").json()
+	hostRules = aitSession.get("https://partner.archive-it.org/api/scope_rule?seed__isnull=True&format=json").json()
 	print ("Requesting Seed Rules")
-	seedRules = aitSession.get("https://partner.archive-it.org/api/scope_rule?format=json").json()
+	seedRules = aitSession.get("https://partner.archive-it.org/api/scope_rule?seed__isnull=False&format=json").json()
 
 	#resolves collection-level extent issue with multiple web archives records overwriting collection-level extents
 	multipleWebExtents = {}
@@ -405,17 +405,12 @@ try:
 									if rule["collection"] == aitCollection:
 										#check if rule existed during crawl
 										if int(timestamp) > int(rule["created_date"].split("T")[0].replace("-", "")):
-											if rule["ignore_robots"] == True:
-												crawlAcqinfo = crawlAcqinfo + "\n\nIgnore Robots.txt for " + rule["host"] + " (last updated " + rule["last_updated_date"].split("T")[0] + ")"
-											elif not rule["block"] == None:
-												crawlAcqinfo = crawlAcqinfo + "\n\nBlock host " + rule["host"]
-											elif not rule["document_limit"] == None:
-												#document limit
-												crawlAcqinfo = crawlAcqinfo + "\n\nLimit host " + rule["host"] + " to " + str(rule["document_limit"]) + " documents"
-											elif not rule["byte_limit"] == None:
-												crawlAcqinfo = crawlAcqinfo + "\n\nLimit date for host " + rule["host"] + " to " + str(rule["byte_limit"]) + " bytes"
-											elif len(rule["crawl_scope_rules"]) > 0:
-												crawlAcqinfo = crawlAcqinfo + "\n\nHost Rule Type " + str(rule["crawl_scope_rules"][0]["rule_type"]) + " " + str(rule["crawl_scope_rules"][0]["format"]) + " " +  str(rule["crawl_scope_rules"][0]["definition"]) + " (last updated " + str(rule["crawl_scope_rules"][0]["last_updated_date"]).split("T")[0] + ")"
+											if rule["value"] is None:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + rule["type"] + " for host " + rule["host"] + " (last updated " + " (created " + rule["created_date"].split("T")[0] + ", last updated " + rule["last_updated_date"].split("T")[0] + ")"
+											elif rule["url_match"] is None:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + rule["type"] + " " + rule["value"] +" for host " + rule["host"] + " (created " + rule["created_date"].split("T")[0] + ", last updated " + rule["last_updated_date"].split("T")[0] + ")"
+											else:
+												crawlAcqinfo = crawlAcqinfo +"\n\nApplied scope rule: " + str(rule["type"]) + " " + str(rule["value"]) + "(" + str(rule["url_match"]) + ")" +" for host " + str(rule["host"]) + " (created " + str(rule["created_date"]).split("T")[0] + ", last updated " + str(rule["last_updated_date"]).split("T")[0] + ")"
 										
 								if seedCheck == True:
 									for seedRule in seedRules:
