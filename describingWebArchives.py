@@ -255,7 +255,13 @@ try:
 										newRecord = AS.makeDate(newRecord, dacs.stamp2DACS(str(timestamp))[1])
 										daoURL = "https://web.archive.org/web/" + str(fullTimestamp) + "/" + recordURL
 										#get page <title>
-										soup = BeautifulSoup(requests.get(daoURL).text, "html.parser")
+										agentHeaders = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0' }
+										try:
+											soup = BeautifulSoup(requests.get(daoURL, headers=agentHeaders).text, "html.parser")
+										except:
+											time.sleep(10)
+											daoURL = "http://web.archive.org/web/" + str(fullTimestamp) + "/" + recordURL
+											soup = BeautifulSoup(requests.get(daoURL, headers=agentHeaders).text, "html.parser")
 										#try to get page <title>
 										try:
 											pageTitle = soup.title.string
