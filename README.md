@@ -202,7 +202,7 @@ All scripts require a  `local_settings.cfg` text file that contains login creden
 ```
 #### `[ArchivesSpace]` section
 
-* `baseURL` is URL of your ASpace instence with 8089 as the port to access the backend API
+* `baseURL` is URL of your ASpace instance with 8089 as the port to access the backend API
 * `repository` is the ASpace repository you'd like to update, default is 2
 * `user` and `password` are ASpace credentials with API permissions
 
