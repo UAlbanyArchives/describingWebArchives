@@ -58,18 +58,7 @@ Automating description for Web Archives in ArchivesSpace using the Archive-It CD
 ##### Examples:
 * https://partner.archive-it.org/api/crawl_job/303101
 
-### Host Rules
-
-* https://partner.archive-it.org/api/host_rule (requires login)
-
-##### Useful Params:
-* ?collection=7801
-
-##### Examples:
-* https://partner.archive-it.org/api/host_rule?collection=3308 (requires login)
-* https://partner.archive-it.org/api/host_rule (requires login)
-
-### Seed Rules
+### Scoping Rules
 
 * https://partner.archive-it.org/api/scope_rule (requires login)
 
@@ -136,8 +125,6 @@ with `local_settings.cfg`:
 * `partnerData -t seed -l collection=3308`
 * `partnerData -t crawl -l id=303101`
 * `partnerData -t crawl -l id=303101 -o C:\output\path\crawl.json`
-* `partnerData -t host_rule -l collection=7801`
-* `partnerData -t host_rule -l collection=3308 ignore_robots=true`
 * `partnerData -t scope_rule -l collection=6372 type=DOC_LIMIT`
 
 ## `describingWebArchives.py`
